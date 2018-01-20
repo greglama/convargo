@@ -162,12 +162,22 @@ function processShipingPrice()
 {
   deliveries.forEach(delivery => {
     var trucker = GetObjectByID(truckers, delivery.truckerId);
-    
+
     if(trucker != undefined)
     {
-      //step 1 calculation of price
-      var price = trucker.pricePerKm * delivery.distance + trucker.pricePerVolume * delivery.volume;
+      //calculation of reduction depending of the volume
+
+      var reduction = 0;
+
+      if(delivery.volume > 5) reduction += 0.1;
+      if(delivery.volume > 10) reduction += 0.2;
+      if(delivery.volume > 25) reduction += 0.2;
+
+      //calculation of price
+      var price = trucker.pricePerKm * delivery.distance + trucker.pricePerVolume * delivery.volume * (1 - reduction);
+
       console.log(price);
+
     }
   });
 }
