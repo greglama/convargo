@@ -180,6 +180,20 @@ function processShipingPrice()
       var treasury = Math.ceil(delivery.distance/DISTANCE_TREASURY_TAX);
       var convargo = commission - insurance - treasury;
 
+
+      var deductible = 0;
+      //calculation of deductible
+
+      if(delivery.options.deductibleReduction)
+      {
+        deductible = delivery.volume * DEDUCTIBLE_BY_VOLUME;
+      }
+
+      //apply the deductible
+      price += deductible;
+      convargo += deductible
+        
+
       delivery.price = price;
       delivery.commission.insurance = insurance;
       delivery.commission.treasury = treasury;
