@@ -162,7 +162,6 @@ function processShipingPrice()
 {
   deliveries.forEach(delivery => {
     var trucker = GetObjectByID(truckers, delivery.truckerId);
-
     if(trucker != undefined)
     {
       //calculation of reduction depending of the volume
@@ -176,8 +175,15 @@ function processShipingPrice()
       //calculation of price
       var price = trucker.pricePerKm * delivery.distance + trucker.pricePerVolume * delivery.volume * (1 - reduction);
 
-      console.log(price);
+      var commission = price * COMMISSION_PERCENTAGE;
+      var insurance = commission * INSURANCE_PERCENTAGE;
+      var treasury = Math.ceil(delivery.distance/DISTANCE_TREASURY_TAX);
+      var convargo = commission - insurance - treasury;
 
+      delivery.price = price;
+      delivery.commission.insurance = insurance;
+      delivery.commission.treasury = treasury;
+      delivery.commission.convargo = convargo;
     }
   });
 }
