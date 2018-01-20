@@ -145,6 +145,35 @@ const actors = [{
   }]
 }];
 
+//declaration of constants
+const COMMISSION_PERCENTAGE = 0.3;
+const INSURANCE_PERCENTAGE = 0.5; //percentage of the commission
+const DISTANCE_TREASURY_TAX = 500;
+const DEDUCTIBLE_BY_VOLUME = 1;
+
+function GetObjectByID(arr, id)// get the object which has the given id in an array
+{
+  var object = undefined;  
+  object = arr.find(function(elem){return id === elem.id;});
+  return object;
+}
+
+function processShipingPrice()
+{
+  deliveries.forEach(delivery => {
+    var trucker = GetObjectByID(truckers, delivery.truckerId);
+    
+    if(trucker != undefined)
+    {
+      //step 1 calculation of price
+      var price = trucker.pricePerKm * delivery.distance + trucker.pricePerVolume * delivery.volume;
+      console.log(price);
+    }
+  });
+}
+
+processShipingPrice();
+
 console.log(truckers);
 console.log(deliveries);
 console.log(actors);
