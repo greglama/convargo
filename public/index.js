@@ -161,11 +161,13 @@ function GetObjectByID(arr, id)// get the object which has the given id in an ar
 function processShipingPrice()
 {
   deliveries.forEach(delivery => {
+
+    //find the trucker involves in this delivery
     var trucker = GetObjectByID(truckers, delivery.truckerId);
+    
     if(trucker != undefined)
     {
       //calculation of reduction depending of the volume
-
       var reduction = 0;
 
       if(delivery.volume > 5) reduction += 0.1;
@@ -193,11 +195,40 @@ function processShipingPrice()
       price += deductible;
       convargo += deductible
         
-
+      //update the price in the delivery
       delivery.price = price;
       delivery.commission.insurance = insurance;
       delivery.commission.treasury = treasury;
       delivery.commission.convargo = convargo;
+
+      //find the payments in actors concerning by the delivery
+      var payments = actors.find(function(actor){return delivery.id === actor.deliveryId;});
+
+      //pay the actors
+      payments.payment.forEach(pay =>{
+        switch(pay.who)
+            {
+              case "shipper":
+                pay.amount = price;
+                break;
+
+              case "trucker":
+                pay.amount = price - commission;
+                break;
+
+              case "insurance":
+                pay.amount = insurance;
+                break;
+
+              case "treasury":
+                pay.amount = treasury;
+                break;
+
+              case "convargo":
+                pay.amount = convargo;
+                break;
+            }
+      });
     }
   });
 }
