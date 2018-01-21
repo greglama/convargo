@@ -151,10 +151,10 @@ const INSURANCE_PERCENTAGE = 0.5; //percentage of the commission
 const DISTANCE_TREASURY_TAX = 500;
 const DEDUCTIBLE_BY_VOLUME = 1;
 
-function GetObjectByID(arr, id)// get the object which has the given id in an array
+function GetObjectByKeyValue(arr, key, value)//get the object which has the given key with the given value
 {
   var object = undefined;  
-  object = arr.find(function(elem){return id === elem.id;});
+  object = arr.find(function(obj){return obj[key] === value;});
   return object;
 }
 
@@ -163,7 +163,7 @@ function processShipingPrice()
   deliveries.forEach(delivery => {
 
     //find the trucker involves in this delivery
-    var trucker = GetObjectByID(truckers, delivery.truckerId);
+    var trucker = GetObjectByKeyValue(truckers,"id", delivery.truckerId);
     
     if(trucker != undefined)
     {
@@ -190,42 +190,38 @@ function processShipingPrice()
       {
         deductible = delivery.volume * DEDUCTIBLE_BY_VOLUME;
       }
-
-      //apply the deductible
-      price += deductible;
-      convargo += deductible
         
       //update the price in the delivery
-      delivery.price = price;
+      delivery.price = price + deductible;
       delivery.commission.insurance = insurance;
       delivery.commission.treasury = treasury;
-      delivery.commission.convargo = convargo;
+      delivery.commission.convargo = convargo + deductible;
 
       //find the payments in actors concerning by the delivery
-      var payments = actors.find(function(actor){return delivery.id === actor.deliveryId;});
+      var payments = GetObjectByKeyValue(actors, "deliveryId", delivery.id);
 
       //pay the actors
       payments.payment.forEach(pay =>{
         switch(pay.who)
             {
               case "shipper":
-                pay.amount = price;
+                pay.amount = delivery.price; //the shiper is concerns by the deductible so it has the price with it
                 break;
 
               case "trucker":
-                pay.amount = price - commission;
+                pay.amount = price - commission; //the trucker is not concern by the deductible so it's the original price - commission
                 break;
 
               case "insurance":
-                pay.amount = insurance;
+                pay.amount = delivery.commission.insurance;
                 break;
 
               case "treasury":
-                pay.amount = treasury;
+                pay.amount = delivery.commission.treasury;
                 break;
 
               case "convargo":
-                pay.amount = convargo;
+                pay.amount = delivery.commission.convargo;
                 break;
             }
       });
